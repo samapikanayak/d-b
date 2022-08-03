@@ -1,0 +1,23 @@
+version: '3'
+services:
+  apiweb:
+    image: nginx:latest
+    volumes:
+     - /config/backend/conf.d/nginx.conf:/etc/nginx/nginx.conf
+     - /config/backend/ssl:/etc/nginx/ssl/
+    ports:
+     - "8443:8443"
+
+  api:
+    build: ./
+    restart: always
+    env_file: /config/backend/.env
+    #entrypoint: "gunicorn --worker-class=gevent --worker-connections=1000 --workers=5 -b :8088 dnbadmin.wsgi:application"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8088"
+    expose:
+     - "8088"
+    ports:
+     - "8088:8088"
+    volumes:
+     - .:/usr/src/api
+  
